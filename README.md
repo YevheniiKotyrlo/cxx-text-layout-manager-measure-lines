@@ -1,17 +1,22 @@
-# React Native Reproducer
+# The cxx `TextLayoutManager` declares no `measureLines`
 
-> [!IMPORTANT]  
-> Do not just **fork** this repository, but use instead the [![Use this template](https://img.shields.io/badge/-Use%20this%20template-brightgreen)](https://github.com/cortinico/reproducer-react-native/generate) button on GitHub.
+The `TextLayoutManager` in `packages/react-native/ReactCommon/react/renderer/textlayoutmanager/platform/cxx/`, the one Fantom's tester builds and subclasses, declares `measure` alone, so `TextLayoutManagerExtended::supportsLineMeasurement()` is false on that platform.
 
-This is the React Native **reproducer** template. 
+`repro.cpp` is one line: `static_assert(facebook::react::TextLayoutManagerExtended::supportsLineMeasurement());`. `repro.sh` compiles it with clang against react-native's `main`, every `platform/cxx` folder of ReactCommon, and the folly, fast_float and fmt versions that `packages/react-native/gradle/libs.versions.toml` pins. It exits 1 while the static assertion fails, 0 once `repro.cpp` compiles, and 2 when a step fails.
 
-You can use this template to create a minimal, complete, and reproducible project that the community can use to understand what's your problem. You can read more about the principles of a good reproducible project [here](https://stackoverflow.com/help/mcve).
+## Run
 
-This template is up to date with `react-native@latest` as you can find it on [npm](https://www.npmjs.com/package/react-native/v/latest).
+On Ubuntu 24.04:
 
-## How to use this repository
+```sh
+apt-get install clang curl git libboost-dev libgoogle-glog-dev libdouble-conversion-dev
+bash repro.sh
+```
 
-1. Click on [![Use this template](https://img.shields.io/badge/-Use%20this%20template-brightgreen)](https://github.com/cortinico/reproducer-react-native/generate) button to create a new repository starting from this one.
-2. Git clone your repository locally.
-3. Edit the project to reproduce the failure you're seeing.
-4. Push your changes, so that Github Actions can run the CI.
+In Docker, from this folder:
+
+```sh
+docker run --rm -v "$PWD:/repro:ro" ubuntu:24.04 bash -c "apt-get update -qq > /dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang curl git libboost-dev libgoogle-glog-dev libdouble-conversion-dev > /dev/null && bash /repro/repro.sh"
+```
+
+`REACT_NATIVE_DIR=<checkout> bash repro.sh` compiles against a local checkout instead of downloading `main`.
