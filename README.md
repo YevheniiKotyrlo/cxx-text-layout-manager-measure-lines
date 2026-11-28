@@ -16,7 +16,7 @@ bash repro.sh
 In Docker, from this folder:
 
 ```sh
-docker run --rm -v "$PWD:/repro:ro" ubuntu:24.04 bash -c "apt-get update -qq > /dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang curl git libboost-dev libgoogle-glog-dev libdouble-conversion-dev > /dev/null && bash /repro/repro.sh"
+docker run --rm --mount type=bind,src=.,dst=/repro,readonly ubuntu:24.04 bash -c "apt-get update -qq > /dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clang curl git libboost-dev libgoogle-glog-dev libdouble-conversion-dev > /dev/null && bash /repro/repro.sh"
 ```
 
 `REACT_NATIVE_DIR=<checkout> bash repro.sh` compiles against a local checkout instead of downloading `main`.
